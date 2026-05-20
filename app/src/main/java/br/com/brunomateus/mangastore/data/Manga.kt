@@ -7,6 +7,7 @@ data class Manga(
     val id: Int,
     val number: Int,
     val title: String,
+    val summary: String,
     val cover: Cover,
     val price: Double
 )
