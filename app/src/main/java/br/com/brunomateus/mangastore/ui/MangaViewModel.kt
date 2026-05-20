@@ -13,9 +13,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
-class MangaViewModel(private val repository: MangaRepository): ViewModel(){
+class MangaViewModel(private val repository: MangaRepository) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MangaUiState())
+    private val _uiState = MutableStateFlow<MangaUiState>(MangaUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -24,36 +24,45 @@ class MangaViewModel(private val repository: MangaRepository): ViewModel(){
 
     fun loadMangas() {
         viewModelScope.launch {
-            val collection = repository.get()
-            _uiState.update { current ->
-                current.copy(
-                    mangas = collection.data,
-                    status = true
-                )
+            _uiState.value = MangaUiState.Loading
+            _uiState.update {
+                try {
+                    val collection = repository.get()
+                    MangaUiState.Success(mangas = collection.data)
+                } catch (e: Exception) {
+                    MangaUiState.Error("Erro ao carregar mangas: ${e.message}")
+                }
             }
+
         }
     }
 
     fun loadMangas(id: Int) {
         viewModelScope.launch {
-            val manga = repository.get(id)
-            _uiState.update { current ->
-                current.copy(
-                    selected = manga.data,
-                    status = true
-                )
+            _uiState.update { currentState ->
+                val currentMangas = when(currentState) {
+                    is MangaUiState.Success -> currentState.mangas
+                    else -> emptyList()
+                }
+
+                try {
+                    val manga = repository.get(id)
+                    MangaUiState.Success(
+                        mangas = currentMangas,
+                        selected = manga.data
+                    )
+                } catch (e: Exception) {
+                    MangaUiState.Error("Erro ao carregar detalhes: ${e.message}")
+                }
             }
         }
     }
 
     companion object {
-
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val repository = MangaRepository(api)
-                MangaViewModel(
-                    repository = repository,
-                )
+                MangaViewModel(repository = repository)
             }
         }
     }

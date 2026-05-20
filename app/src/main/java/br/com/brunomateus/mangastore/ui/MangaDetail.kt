@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,9 +58,11 @@ fun MangaDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MangaViewModel = viewModel(factory = MangaViewModel.Factory)
 ) {
+
     viewModel.loadMangas(id)
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val manga = uiState.selected
+
     val configuration = LocalConfiguration.current
     val betterContentScale = when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> ContentScale.FillWidth
@@ -67,12 +72,12 @@ fun MangaDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(manga?.title ?: "Detalhes") },
+                title = { Text(stringResource(R.string.details)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = arrow_back,
-                            contentDescription = "Voltar"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
@@ -84,92 +89,123 @@ fun MangaDetailScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(innerPadding)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            if (manga != null) {
-                val offset = Offset(5.0f, 5.0f)
-                Box(
-                    modifier = Modifier.weight(1.0f)
-                ) {
-                    AsyncImage(
-                        model = "${BASE_URL}${manga.cover.url}",
-                        contentScale = betterContentScale,
-                        contentDescription = manga.title,
-                        modifier = Modifier
-                            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-                            .drawWithContent {
-                                drawContent()
-                                drawRect(
-                                    brush = Brush.verticalGradient(
-                                        0.7f to Color.Red, 1.0f to Color.Transparent
-                                    ), blendMode = BlendMode.DstIn
+            when (uiState) {
+                is MangaUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                is MangaUiState.Error -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = (uiState as MangaUiState.Error).message,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.loadMangas(id) }) {
+                            Text("Tentar novamente")
+                        }
+                    }
+                }
+                is MangaUiState.Success -> {
+                    val manga = (uiState as? MangaUiState.Success)?.selected
+                    if (manga != null) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            val offset = Offset(5.0f, 5.0f)
+                            Box(
+                                modifier = Modifier.weight(1.0f)
+                            ) {
+                                AsyncImage(
+                                    model = "${BASE_URL}${manga.cover.url}",
+                                    contentScale = betterContentScale,
+                                    contentDescription = manga.title,
+                                    modifier = Modifier
+                                        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                                        .drawWithContent {
+                                            drawContent()
+                                            drawRect(
+                                                brush = Brush.verticalGradient(
+                                                    0.7f to Color.Red, 1.0f to Color.Transparent
+                                                ), blendMode = BlendMode.DstIn
+                                            )
+                                        }
+                                        .fillMaxWidth()
+                                )
+                                Text(
+                                    text = manga.title,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    style = MaterialTheme.typography.headlineMedium + TextStyle(
+                                        shadow = Shadow(
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            offset = offset,
+                                            blurRadius = 3f
+                                        )
+                                    ),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .padding(horizontal = 20.dp)
+                                        .align(Alignment.BottomStart)
                                 )
                             }
-                            .fillMaxWidth()
-                    )
-                    Text(
-                        text = manga.title,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        style = MaterialTheme.typography.headlineMedium + TextStyle(
-                            shadow = Shadow(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                offset = offset,
-                                blurRadius = 3f
-                            )
-                        ),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 20.dp).align(Alignment.BottomStart)
-                    )
-                }
 
 
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .fillMaxWidth()
-                ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp)
+                                    .fillMaxWidth()
+                            ) {
 
 
-                    Row(
-                        modifier = Modifier.padding(vertical = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        AssistChip(
-                            onClick = { },
-                            label = { Text("Volume ${manga.number}") },
-                            leadingIcon = { Icon(imageVector = numbers, null, Modifier.size(18.dp)) }
-                        )
-                        AssistChip(
-                            onClick = { },
-                            label = { Text("R$ ${manga.price}") },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = attach_money,
-                                    null,
-                                    Modifier.size(18.dp)
+                                Row(
+                                    modifier = Modifier.padding(vertical = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    AssistChip(
+                                        onClick = { },
+                                        label = { Text("Volume ${manga.number}") },
+                                        leadingIcon = { Icon(imageVector = numbers, null, Modifier.size(18.dp)) }
+                                    )
+                                    AssistChip(
+                                        onClick = { },
+                                        label = { Text("R$ ${manga.price}") },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = attach_money,
+                                                null,
+                                                Modifier.size(18.dp)
+                                            )
+                                        },
+                                        colors = AssistChipDefaults.assistChipColors(
+                                            labelColor = MaterialTheme.colorScheme.primary,
+                                            leadingIconContentColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    )
+                                }
+
+                                Text(
+                                    text = stringResource(R.string.summary),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.SemiBold
                                 )
-                            },
-                            colors = AssistChipDefaults.assistChipColors(
-                                labelColor = MaterialTheme.colorScheme.primary,
-                                leadingIconContentColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = manga.summary,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
-
-                    Text(
-                        text = stringResource(R.string.summary),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = manga.summary,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
         }

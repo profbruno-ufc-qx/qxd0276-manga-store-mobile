@@ -2,7 +2,10 @@ package br.com.brunomateus.mangastore.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -12,8 +15,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,18 +58,47 @@ fun MangaList(
         },
         modifier = modifier
     ) { innerPadding ->
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 160.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp),
-            modifier = Modifier.padding(innerPadding)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            items(uiState.mangas) { manga ->
-                MangaItem(
-                    manga = manga,
-                    onClick = { navigateTo(manga.id) }
-                )
+            when (uiState) {
+                is MangaUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                is MangaUiState.Error -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = (uiState as MangaUiState.Error).message,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.loadMangas() }) {
+                            Text("Tentar novamente")
+                        }
+                    }
+                }
+                is MangaUiState.Success -> {
+                    val mangas = (uiState as MangaUiState.Success).mangas
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 160.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(mangas) { manga ->
+                            MangaItem(
+                                manga = manga,
+                                onClick = { navigateTo(manga.id) }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -100,7 +134,9 @@ fun MangaItem(manga: Manga, onClick: () -> Unit, modifier: Modifier = Modifier) 
 
                     }
                 },
-                modifier = Modifier.offset(20.dp, 10.dp).align(Alignment.TopStart)
+                modifier = Modifier
+                    .offset(20.dp, 10.dp)
+                    .align(Alignment.TopStart)
             ) {
 
             }
