@@ -2,18 +2,15 @@ package br.com.brunomateus.mangastore.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import br.com.brunomateus.mangastore.data.Manga
 import br.com.brunomateus.mangastore.data.MangaRepository
 import br.com.brunomateus.mangastore.network.api
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
 
 
 class MangaViewModel(private val repository: MangaRepository): ViewModel(){
