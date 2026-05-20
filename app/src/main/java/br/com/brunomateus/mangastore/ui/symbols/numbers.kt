@@ -1,4 +1,4 @@
-package com.example.test
+package br.com.brunomateus.mangastore.ui.symbols
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType

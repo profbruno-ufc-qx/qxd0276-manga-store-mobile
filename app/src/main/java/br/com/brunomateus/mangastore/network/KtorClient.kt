@@ -11,6 +11,8 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
+const val BASE_URL = "http://10.0.2.2:1337"
+
 val api = HttpClient(Android) {
     install(ContentNegotiation) {
         json(
@@ -29,6 +31,6 @@ val api = HttpClient(Android) {
         }
     }
     defaultRequest {
-        url("http://10.0.2.2:1337/")
+        url(urlString = BASE_URL)
     }
 }
