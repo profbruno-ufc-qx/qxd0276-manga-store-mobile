@@ -6,3 +6,8 @@ import kotlinx.serialization.Serializable
 data class CollectionDTO<T>(
     val data: List<T>
 )
+
+@Serializable
+data class Single<T>(
+    val data: T
+)

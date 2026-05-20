@@ -54,6 +54,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import br.com.brunomateus.mangastore.data.Manga
+import br.com.brunomateus.mangastore.ui.MangaDetailScreen
+import br.com.brunomateus.mangastore.ui.MangaList
 import br.com.brunomateus.mangastore.ui.MangaViewModel
 import br.com.brunomateus.mangastore.ui.theme.MangaStoreTheme
 import coil3.compose.AsyncImage
@@ -97,7 +99,6 @@ fun Navigation(modifier: Modifier = Modifier) {
                 })
             }
             entry<MangaDetail> {
-
                 MangaDetailScreen(it.id)
             }
         },
@@ -105,93 +106,7 @@ fun Navigation(modifier: Modifier = Modifier) {
     )
 }
 
-@Composable
-fun MangaList(
-    navigateTo: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: MangaViewModel = viewModel(factory = MangaViewModel.Factory)
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 120.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(4.dp),
-        modifier = modifier
-    ) {
-        items(uiState.mangas) { manga ->
-            MangaItem(
-                manga = manga,
-                navigateTo = navigateTo
-            )
-
-        }
-    }
-}
-
-@Composable
-fun MangaItem(manga: Manga, navigateTo: (Int) -> Unit, modifier: Modifier = Modifier) {
-
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
-        ),
-        onClick = {
-            navigateTo(manga.id)
-        },
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            AsyncImage(
-                model = "http://10.0.2.2:1337${manga.cover.url}",
-                contentDescription = "${manga.title}",
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier.fillMaxWidth()
-            )
-            BadgedBox(
-                badge = {
-                    Badge {
-                        Text(
-                            text = manga.number.toString(),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-
-
-                    }
-                },
-                modifier = Modifier.offset(20.dp, 10.dp).align(Alignment.TopStart)
-            ) {
-
-            }
-        }
-    }
-
-
-}
-
-
-@Composable
-fun MangaDetailScreen(id: Int, modifier: Modifier = Modifier) {
-    Card(modifier = Modifier.padding(10.dp)) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-//            AsyncImage(
-//                model = "http://10.0.2.2:1337${manga.cover.url}",
-//                contentDescription = "${manga.title}"
-//            )
-//            Text(text = manga.title)
-//            Text(text = "${manga.price}")
-//            Text(text = "${manga.number}")
-            Text(text = "id do manga selecionado $id")
-        }
-
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

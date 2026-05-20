@@ -14,10 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class MangaUiState(
-    val mangas: List<Manga> = emptyList(),
-    val status: Boolean = false
-)
 
 
 class MangaViewModel(private val repository: MangaRepository): ViewModel(){
@@ -35,6 +31,18 @@ class MangaViewModel(private val repository: MangaRepository): ViewModel(){
             _uiState.update { current ->
                 current.copy(
                     mangas = collection.data,
+                    status = true
+                )
+            }
+        }
+    }
+
+    fun loadMangas(id: Int) {
+        viewModelScope.launch {
+            val manga = repository.get(id)
+            _uiState.update { current ->
+                current.copy(
+                    selected = manga.data,
                     status = true
                 )
             }
