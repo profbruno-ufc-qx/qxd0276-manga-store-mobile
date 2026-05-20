@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -13,8 +14,12 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,6 +32,7 @@ import br.com.brunomateus.mangastore.data.Manga
 import br.com.brunomateus.mangastore.network.BASE_URL
 import coil3.compose.AsyncImage
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MangaList(
     navigateTo: (Int) -> Unit,
@@ -35,18 +41,31 @@ fun MangaList(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 160.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(16.dp),
-        modifier = modifier
-    ) {
-        items(uiState.mangas) { manga ->
-            MangaItem(
-                manga = manga,
-                onClick = { navigateTo(manga.id) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Manga Store") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
             )
+        },
+        modifier = modifier
+    ) { innerPadding ->
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 160.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            items(uiState.mangas) { manga ->
+                MangaItem(
+                    manga = manga,
+                    onClick = { navigateTo(manga.id) }
+                )
+            }
         }
     }
 }
