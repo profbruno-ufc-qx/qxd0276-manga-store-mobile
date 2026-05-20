@@ -1,7 +1,11 @@
 package br.com.brunomateus.mangastore.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import br.com.brunomateus.mangastore.data.Manga
 import br.com.brunomateus.mangastore.data.MangaRepository
 import br.com.brunomateus.mangastore.network.api
@@ -16,12 +20,10 @@ data class MangaUiState(
 )
 
 
-class MangaViewModel(): ViewModel(){
+class MangaViewModel(private val repository: MangaRepository): ViewModel(){
 
     private val _uiState = MutableStateFlow(MangaUiState())
     val uiState = _uiState.asStateFlow()
-
-    val respository = MangaRepository(api)
 
     init {
         loadMangas()
@@ -29,11 +31,23 @@ class MangaViewModel(): ViewModel(){
 
     fun loadMangas() {
         viewModelScope.launch {
-            val collection = respository.get()
+            val collection = repository.get()
             _uiState.update { current ->
                 current.copy(
                     mangas = collection.data,
                     status = true
+                )
+            }
+        }
+    }
+
+    companion object {
+
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val repository = MangaRepository(api)
+                MangaViewModel(
+                    repository = repository,
                 )
             }
         }

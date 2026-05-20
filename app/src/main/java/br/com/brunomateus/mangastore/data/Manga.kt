@@ -7,6 +7,12 @@ data class Manga(
     val id: Int,
     val number: Int,
     val title: String,
-    //val cover: String,
+    val cover: Cover,
     val price: Double
+)
+
+
+@Serializable
+data class Cover(
+    val url: String
 )

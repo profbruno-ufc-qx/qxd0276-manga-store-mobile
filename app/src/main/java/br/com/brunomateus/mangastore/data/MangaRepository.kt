@@ -11,6 +11,6 @@ class MangaRepository(val api: HttpClient) {
     suspend fun get(): CollectionDTO<Manga> =
         api.get("/api/mangas") {
             parameter("populate", "cover")
-        }.body()
+        } .body()
 
 }
