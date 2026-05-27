@@ -13,27 +13,24 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
-class MangaViewModel(private val repository: MangaRepository) : ViewModel() {
+class MangaDetailViewModel(private val repository: MangaRepository) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<MangaListUiState>(MangaListUiState.Loading)
+    private val _uiState = MutableStateFlow<MangaDetailUiState>(MangaDetailUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    init {
-        loadMangas()
-    }
 
-    fun loadMangas() {
+    fun loadMangas(id: Int) {
         viewModelScope.launch {
-            _uiState.value = MangaListUiState.Loading
-            _uiState.update {
+            _uiState.update { currentState ->
                 try {
-                    val collection = repository.get()
-                    MangaListUiState.Success(mangas = collection.data)
+                    val manga = repository.get(id)
+                    MangaDetailUiState.Success(
+                        selected = manga.data
+                    )
                 } catch (e: Exception) {
-                    MangaListUiState.Error("Erro ao carregar mangas: ${e.message}")
+                    MangaDetailUiState.Error("Erro ao carregar detalhes: ${e.message}")
                 }
             }
-
         }
     }
 
@@ -41,7 +38,7 @@ class MangaViewModel(private val repository: MangaRepository) : ViewModel() {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val repository = MangaRepository(api)
-                MangaViewModel(repository = repository)
+                MangaDetailViewModel(repository = repository)
             }
         }
     }

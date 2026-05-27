@@ -8,7 +8,6 @@ android {
     namespace = "br.com.brunomateus.mangastore"
     compileSdk {
         version = release(37) {
-
         }
     }
 
